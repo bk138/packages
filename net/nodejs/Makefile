@@ -42,7 +42,7 @@ define Package/npm
   CATEGORY:=Languages
   TITLE:=Nodejs Package Manager
   URL:=http://nodejs.org/
-  DEPENDS:= +node
+  DEPENDS:= +node +gcc +python +make
 endef
  
 define Package/npm/description
