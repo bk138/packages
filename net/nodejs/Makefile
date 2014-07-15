@@ -50,7 +50,7 @@ define Build/Configure
 	export CFLAGS="$(TARGET_CFLAGS) $(LIBS)"; \
 	export CXXFLAGS="$(TARGET_CXXFLAGS) $(LIBS)"; \
     export GYPFLAGS="$(GYPFLAGS)"; \
-	./configure --dest-cpu=mips --dest-os=linux --without-ssl --without-snapshot --with-arm-float-abi=soft; \
+	$(PYTHON) ./configure --dest-cpu=mips --dest-os=linux --without-ssl --without-snapshot --with-arm-float-abi=soft; \
 	);
 endef
 
