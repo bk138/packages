@@ -23,7 +23,7 @@ LIBS:=-I$(TOOLCHAIN_DIR)/mips-openwrt-linux-uclibc/include/c++/4.6.3/ -I$(TOOLCH
 include $(INCLUDE_DIR)/package.mk
 
 define Package/node
-  DEPENDS:=+libpthread +librt +uclibcxx
+  DEPENDS:=+libpthread +librt +uclibcxx $(if $(CONFIG_PACKAGE_libopenssl), +libcryptoxx +libopenssl)
   SECTION:=lang
   CATEGORY:=Languages
   TITLE:=Node.js is a platform built on Chrome's JavaScript runtime
@@ -68,7 +68,12 @@ define Build/Configure
 	export CFLAGS="$(TARGET_CFLAGS) $(LIBS)"; \
 	export CXXFLAGS="$(TARGET_CXXFLAGS) $(LIBS)"; \
     export GYPFLAGS="$(GYPFLAGS)"; \
-	$(PYTHON) ./configure --dest-cpu=mips --dest-os=linux --without-ssl --without-snapshot --with-arm-float-abi=soft; \
+	$(PYTHON) ./configure \
+		--dest-cpu=mips \
+		--dest-os=linux \
+		--without-snapshot \
+		$(if $(CONFIG_PACKAGE_libopenssl),--shared-openssl) \
+		--with-arm-float-abi=soft; \
 	);
 endef
 
