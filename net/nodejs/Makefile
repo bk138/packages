@@ -96,6 +96,7 @@ define Package/npm/install
 	$(CP) $(PKG_BUILD_DIR)/deps/npm/bin/read-package-json.js $(1)/usr/share/npm/bin/
 	$(CP) $(PKG_BUILD_DIR)/deps/npm/lib $(1)/usr/share/npm/
 	$(CP) $(PKG_BUILD_DIR)/deps/npm/node_modules $(1)/usr/share/npm/
+	$(CP) $(PKG_BUILD_DIR)/deps/npm/package.json $(1)/usr/share/npm/
 	ln -s /usr/share/npm/bin/npm-cli.js $(1)/usr/bin/npm
 endef
 
