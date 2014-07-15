@@ -30,9 +30,26 @@ define Package/node
   URL:=http://nodejs.org/
 endef
 
+
 define Package/node/description
 Node.js is a platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.
 endef
+
+
+define Package/npm
+  SECTION:=lang
+  CATEGORY:=Languages
+  TITLE:=Nodejs Package Manager
+  URL:=http://nodejs.org/
+  DEPENDS:=nodejs
+endef
+ 
+define Package/npm/description
+ Nodejs Package Manager
+endef
+
+
+
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
@@ -66,4 +83,17 @@ define Package/node/install
 	ln -s /usr/bin/node $(1)/usr/bin/nodejs
 endef
 
+define Package/npm/install
+	mkdir -p $(1)/usr/bin
+	mkdir -p $(1)/usr/share/npm/bin
+	$(CP) $(PKG_BUILD_DIR)/deps/npm/bin/npm-cli.js $(1)/usr/share/npm/bin/
+	$(CP) $(PKG_BUILD_DIR)/deps/npm/bin/read-package-json.js $(1)/usr/share/npm/bin/
+	$(CP) $(PKG_BUILD_DIR)/deps/npm/lib $(1)/usr/share/npm/
+	$(CP) $(PKG_BUILD_DIR)/deps/npm/node_modules $(1)/usr/share/npm/
+	ln -s /usr/share/npm/bin/npm-cli.js $(1)/usr/bin/npm
+endef
+
+ 
+
 $(eval $(call BuildPackage,node))
+$(eval $(call BuildPackage,npm))
