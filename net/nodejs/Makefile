@@ -28,6 +28,7 @@ define Package/node
   CATEGORY:=Languages
   TITLE:=Node.js is a platform built on Chrome's JavaScript runtime
   URL:=http://nodejs.org/
+  MAINTAINER:=Christian Beier <cb@shoutrlabs.com>
 endef
 
 
