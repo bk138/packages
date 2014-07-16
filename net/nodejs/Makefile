@@ -23,12 +23,12 @@ LIBS:=-I$(TOOLCHAIN_DIR)/mips-openwrt-linux-uclibc/include/c++/4.6.3/ -I$(TOOLCH
 include $(INCLUDE_DIR)/package.mk
 
 define Package/node
-  DEPENDS:=+libpthread +librt +uclibcxx $(if $(CONFIG_PACKAGE_libopenssl), +libcryptoxx +libopenssl)
-  SECTION:=lang
-  CATEGORY:=Languages
+  SECTION:=net
+  CATEGORY:=Network
   TITLE:=Node.js is a platform built on Chrome's JavaScript runtime
   URL:=http://nodejs.org/
   MAINTAINER:=Christian Beier <cb@shoutrlabs.com>
+  DEPENDS:=+libpthread +librt +uclibcxx $(if $(CONFIG_PACKAGE_libopenssl), +libcryptoxx +libopenssl)
 endef
 
 
@@ -38,10 +38,11 @@ endef
 
 
 define Package/npm
-  SECTION:=lang
-  CATEGORY:=Languages
+  SECTION:=net
+  CATEGORY:=Network
   TITLE:=Nodejs Package Manager
   URL:=http://nodejs.org/
+  MAINTAINER:=Christian Beier <cb@shoutrlabs.com>
   DEPENDS:= +node +gcc +python +make +flock
 endef
  
