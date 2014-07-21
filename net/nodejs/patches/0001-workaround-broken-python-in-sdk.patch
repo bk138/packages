@@ -1,0 +1,12 @@
+diff --git a/deps/v8/tools/js2c.py b/deps/v8/tools/js2c.py
+index d06cbe4..e67968f 100644
+--- a/deps/v8/tools/js2c.py
++++ b/deps/v8/tools/js2c.py
+@@ -33,7 +33,6 @@
+ 
+ import os, re, sys, string
+ import jsmin
+-import bz2
+ 
+ 
+ def ToCAsciiArray(lines):
