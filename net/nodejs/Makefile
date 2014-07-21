@@ -26,7 +26,7 @@ define Package/node
   TITLE:=Node.js is a platform built on Chrome's JavaScript runtime
   URL:=http://nodejs.org/
   MAINTAINER:=Christian Beier <cb@shoutrlabs.com>
-  DEPENDS:=+libpthread +librt +uclibcxx $(if $(CONFIG_PACKAGE_libopenssl), +libcryptoxx +libopenssl)
+  DEPENDS:=+libpthread +librt +uclibcxx $(if $(CONFIG_PACKAGE_libopenssl), +libcryptoxx +libopenssl) $(if $(CONFIG_PACKAGE_libzip), +libzip)
 endef
 
 
@@ -60,6 +60,7 @@ define Build/Configure
 		--dest-os=linux \
 		--without-snapshot \
 		$(if $(CONFIG_PACKAGE_libopenssl),--shared-openssl) \
+		$(if $(CONFIG_PACKAGE_libzip),--shared-zlib) \
 		--with-arm-float-abi=soft; \
 	);
 endef
