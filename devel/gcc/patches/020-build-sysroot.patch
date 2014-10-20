@@ -1,0 +1,26 @@
+diff --git a/gcc/configure b/gcc/configure
+index 3793681..3d23d9c 100755
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -26809,6 +26809,8 @@ if test x$host != x$target || test "x$TARGET_SYSTEM_ROOT" != x; then
+   else
+     target_header_dir="${with_sysroot}${native_system_header_dir}"
+   fi
++  elif test x$host != x$build && test "x$with_build_sysroot" != "x"; then
++    target_header_dir="${with_build_sysroot}${native_system_header_dir}"
+ else
+   target_header_dir=${native_system_header_dir}
+ fi
+diff --git a/gcc/configure.ac b/gcc/configure.ac
+index 3ee1d67..577ee64 100644
+--- a/gcc/configure.ac
++++ b/gcc/configure.ac
+@@ -4741,6 +4741,8 @@ if test x$host != x$target || test "x$TARGET_SYSTEM_ROOT" != x; then
+   else
+     target_header_dir="${with_sysroot}${native_system_header_dir}"
+   fi
++  elif test x$host != x$build && test "x$with_build_sysroot" != "x"; then
++    target_header_dir="${with_build_sysroot}${native_system_header_dir}"
+ else
+   target_header_dir=${native_system_header_dir}
+ fi
