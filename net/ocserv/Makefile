@@ -8,15 +8,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ocserv
-PKG_VERSION:=0.8.0
-PKG_RELEASE:=3
+PKG_VERSION:=0.8.6
+PKG_RELEASE:=1
 
 PKG_BUILD_DIR :=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL :=ftp://ftp.infradead.org/pub/ocserv/
-PKG_MD5SUM:=6383535a21f8eecfb1bbb7f7ac99c41f
+PKG_MD5SUM:=78301874643ae658d43a8c7f4aaabadb
 
-PKG_LICENSE:=GPLv3
+PKG_LICENSE:=GPLv2
 PKG_LICENSE_FILES:=COPYING
 PKG_FIXUP:=autoreconf
 
@@ -34,6 +34,7 @@ define Package/ocserv
   URL:=http://www.infradead.org/ocserv/
   MAINTAINER:=Nikos Mavrogiannopoulos <n.mavrogiannopoulos@gmail.com>
   DEPENDS:= +libgnutls +certtool +libncurses +libreadline +OCSERV_PAM:libpam +OCSERV_PROTOBUF:libprotobuf-c
+  USERID:=ocserv=72:ocserv=72
 endef
 
 define Package/ocserv/description
@@ -61,12 +62,17 @@ ifneq ($(CONFIG_OCSERV_PROTOBUF),y)
 CONFIGURE_ARGS += --without-protobuf
 endif
 
+define Package/ocserv/conffiles
+/etc/config/ocserv
+endef
+
 define Package/ocserv/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ocserv $(1)/usr/sbin/
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/ocpasswd $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/occtl $(1)/usr/bin/
+	$(INSTALL_BIN) ./files/ocserv-script $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/ocserv.init $(1)/etc/init.d/ocserv
 	$(INSTALL_DIR) $(1)/etc/ocserv

@@ -9,13 +9,16 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=rtorrent
 PKG_VERSION:=0.9.4-git
-PKG_RELEASE:=$(PKG_SOURCE_VERSION)-1
+PKG_RELEASE:=2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/rakshasa/rtorrent.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_VERSION:=6a3234eaa79f15857260df31f98711ef24266191
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
+
+PKG_LICENSE:=GPL-2.0
+PKG_LICENSE_FILE:=COPYING
 
 PKG_FIXUP:=autoreconf
 PKG_BUILD_PARALLEL:=1
@@ -32,6 +35,7 @@ define Package/rtorrent/Default
   TITLE:=BitTorrent client for ncurses
   URL:=http://libtorrent.rakshasa.no/
   DEPENDS:=+libcurl +libtorrent +libncursesw +libsigcxx +libpthread
+  MAINTAINER:=Peter Wagner <tripolar@gmx.at>
 endef
 
 define Package/rtorrent/Default/description
@@ -63,7 +67,7 @@ $(call Package/rtorrent/Default/description)
  This package is built with xmlrpc support
 endef
 
-TARGET_LDFLAGS += -lpthread -Wl,-rpath-link=$(STAGING_DIR)/usr/lib
+TARGET_LDFLAGS += -lz -lpthread -Wl,-rpath-link=$(STAGING_DIR)/usr/lib
 
 CONFIGURE_ARGS+= \
 	--enable-shared \

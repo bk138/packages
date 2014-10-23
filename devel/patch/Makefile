@@ -11,9 +11,11 @@ PKG_NAME:=patch
 PKG_VERSION:=2.7.1
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=@GNU/patch
-PKG_MD5SUM:=95dd8d7e41dcbcecdd5cd88ef915378d
+PKG_MD5SUM:=e9ae5393426d3ad783a300a338c09b72
+PKG_LICENSE:=GPL-3.0+
+PKG_LICENSE_FILES:=COPYING
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -29,6 +31,8 @@ define Package/patch/description
   The Patch package contains a program for modifying or creating files
   by applying a "patch" file typically created by the diff program.
 endef
+
+CONFIGURE_ARGS+= --disable-xattr
 
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \

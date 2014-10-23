@@ -23,13 +23,13 @@ proto_openconnect_setup() {
 
 	logger -t openconnect "initializing..."
 	serv_addr=
-	for ip in $(resolveip -t 5 "$server"); do
-		proto_add_host_dependency "$config" "$server"
+	for ip in $(resolveip -t 10 "$server"); do
+		( proto_add_host_dependency "$config" "$ip" )
 		serv_addr=1
 	done
 	[ -n "$serv_addr" ] || {
-		logger -t openconnect "Could not resolve server address"
-		sleep 5
+		logger -t openconnect "Could not resolve server address: '$server'"
+		sleep 60
 		proto_setup_failed "$config"
 		exit 1
 	}
@@ -55,13 +55,15 @@ proto_openconnect_setup() {
 	logger -t openconnect "executing 'openconnect $cmdline'"
 
 	if [ -f "$pwfile" ];then
-		proto_run_command "$config" /usr/sbin/openconnect $cmdline <$pwfile
+		proto_run_command "$config" /usr/sbin/openconnect-wrapper $pwfile $cmdline
 	else
 		proto_run_command "$config" /usr/sbin/openconnect $cmdline
 	fi
 }
 
 proto_openconnect_teardown() {
+	local config="$1"
+
 	pwfile="/var/run/openconnect-$config.passwd"
 
 	rm -f $pwfile

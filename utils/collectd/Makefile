@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=collectd
-PKG_VERSION:=4.10.8
-PKG_RELEASE:=3
+PKG_VERSION:=5.4.1
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=http://collectd.org/files/
-PKG_MD5SUM:=7a60495208b9383225493c6dd6abb2f0
+PKG_MD5SUM:=6f56c71c96573a7f4f7fb3bfab185974
 
 PKG_FIXUP:=autoreconf
 PKG_REMOVE_FILES:=aclocal.m4 libltdl/aclocal.m4
@@ -24,11 +24,17 @@ PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
 COLLECTD_PLUGINS_DISABLED:= \
+	amqp \
 	apple_sensors \
+	aquaero \
 	battery \
+	cgroups \
 	cpufreq \
 	curl_json \
+	curl_xml \
+	dbi \
 	entropy \
+	ethstat \
 	genericjmx \
 	gmond \
 	hddtemp \
@@ -36,28 +42,42 @@ COLLECTD_PLUGINS_DISABLED:= \
 	ipvs \
 	java \
 	libvirt \
+	lpar \
 	mbmon \
+	md \
 	memcachec \
 	memcached \
+	mic \
 	monitorus \
 	multimeter \
 	netapp \
 	nfs \
 	notify_desktop \
 	notify_email \
+	numa \
+	nut \
 	openvz \
 	oracle \
 	perl \
+	pf \
 	pinba \
 	python \
+	redis \
 	routeros \
 	rrdcached \
 	serial \
+	sigrok \
+	statsd \
 	swap \
 	tape \
 	tokyotyrant \
 	uuid \
+	varnish \
 	vserver \
+	write_graphite \
+	write_mongodb \
+	write_redis \
+	write_riemann \
 	xmms \
 	zfs_arc \
 
@@ -71,7 +91,6 @@ COLLECTD_PLUGINS_SELECTED:= \
 	cpu \
 	csv \
 	curl \
-	dbi \
 	df \
 	disk \
 	dns \
@@ -93,7 +112,6 @@ COLLECTD_PLUGINS_SELECTED:= \
 	network \
 	nginx \
 	ntpd \
-	nut \
 	olsrd \
 	onewire \
 	openvpn \
@@ -106,11 +124,11 @@ COLLECTD_PLUGINS_SELECTED:= \
 	sensors \
 	snmp \
 	syslog \
-	tail \
 	table \
-	ted \
+	tail \
 	tcpconns \
 	teamspeak2 \
+	ted \
 	thermal \
 	unixsock \
 	uptime \
@@ -263,7 +281,7 @@ $(eval $(call BuildPlugin,contextswitch,context switch input,contextswitch,))
 $(eval $(call BuildPlugin,cpu,CPU input,cpu,))
 $(eval $(call BuildPlugin,csv,CSV output,csv,))
 $(eval $(call BuildPlugin,curl,cURL input,curl,+PACKAGE_collectd-mod-curl:libcurl))
-$(eval $(call BuildPlugin,dbi,relational database input,dbi,+PACKAGE_collectd-mod-dbi:libdbi))
+#$(eval $(call BuildPlugin,dbi,relational database input,dbi,+PACKAGE_collectd-mod-dbi:libdbi))
 $(eval $(call BuildPlugin,df,disk space input,df,))
 $(eval $(call BuildPlugin,disk,disk usage/timing input,disk,))
 $(eval $(call BuildPlugin,dns,DNS traffic input,dns,+PACKAGE_collectd-mod-dns:libpcap))
@@ -278,14 +296,14 @@ $(eval $(call BuildPlugin,iwinfo,libiwinfo wireless statistics,iwinfo,+PACKAGE_c
 $(eval $(call BuildPlugin,load,system load input,load,))
 $(eval $(call BuildPlugin,logfile,log files output,logfile,))
 $(eval $(call BuildPlugin,madwifi,MadWifi status input,madwifi,))
-$(eval $(call BuildPlugin,mysql,MySQL status input,mysql,+PACKAGE_collectd-mod-mysql:libmysqlclient-r))
+#$(eval $(call BuildPlugin,mysql,MySQL status input,mysql,+PACKAGE_collectd-mod-mysql:libmysqlclient-r))
 $(eval $(call BuildPlugin,memory,physical memory usage input,memory,))
 $(eval $(call BuildPlugin,modbus,read variables through libmodbus,modbus,+PACKAGE_collectd-mod-modbus:libmodbus @BROKEN))
 $(eval $(call BuildPlugin,netlink,netlink input,netlink,+PACKAGE_collectd-mod-netlink:ip @BROKEN))
 $(eval $(call BuildPlugin,network,network input/output,network))
 $(eval $(call BuildPlugin,nginx,nginx status input,nginx,+PACKAGE_collectd-mod-nginx:libcurl))
 $(eval $(call BuildPlugin,ntpd,NTP daemon status input,ntpd,))
-$(eval $(call BuildPlugin,nut,UPS monitoring input,nut,+PACKAGE_collectd-mod-nut:nut))
+#$(eval $(call BuildPlugin,nut,UPS monitoring input,nut,+PACKAGE_collectd-mod-nut:nut))
 $(eval $(call BuildPlugin,olsrd,OLSRd status input,olsrd,))
 $(eval $(call BuildPlugin,onewire,onewire sensor input,onewire,+PACKAGE_collectd-mod-onewire:libow-capi @BROKEN))
 $(eval $(call BuildPlugin,openvpn,OpenVPN traffic/compression input,openvpn,))

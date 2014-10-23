@@ -15,14 +15,18 @@ PKG_SOURCE:=freeradius-server-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=ftp://ftp.freeradius.org/pub/freeradius/
 PKG_MD5SUM:=40535bace507d7a3134c3d858f3cbc5a
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
+PKG_LICENSE:=GPL-2.0
+PKG_LICENSE_FILES:=COPYRIGHT LICENSE
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/freeradius-server-$(PKG_VERSION)
 PKG_FIXUP:=autoreconf
+PKG_CHECK_FORMAT_SECURITY:=0
 
 PKG_CONFIG_DEPENDS := \
   FREERADIUS_OPENSSL \
   FREERADIUS_NOSSL
 
+PKG_CHECK_FORMAT_SECURITY:=0
 include $(INCLUDE_DIR)/package.mk
 
 define Package/freeradius2/config
@@ -215,7 +219,7 @@ endef
 
 define Package/freeradius2-mod-ldap
   $(call Package/freeradius2/Default)
-  DEPENDS:=freeradius2 +PACKAGE_freeradius2-mod-ldap:libopenldap
+  DEPENDS:=freeradius2 +libopenldap
   TITLE:=LDAP module
 endef
 
@@ -289,22 +293,19 @@ endef
 
 define Package/freeradius2-mod-sql-mysql
   $(call Package/freeradius2/Default)
-  DEPENDS:=freeradius2-mod-sql \
-  	+PACKAGE_freeradius2-mod-sql-mysql:libmysqlclient-r
+  DEPENDS:=freeradius2-mod-sql +libmysqlclient-r
   TITLE:=MySQL module
 endef
 
 define Package/freeradius2-mod-sql-pgsql
   $(call Package/freeradius2/Default)
-  DEPENDS:=freeradius2-mod-sql \
-  	+PACKAGE_freeradius2-mod-sql-pgsql:libpq
+  DEPENDS:=freeradius2-mod-sql +libpq
   TITLE:=PostgreSQL module
 endef
 
 define Package/freeradius2-mod-sql-sqlite
   $(call Package/freeradius2/Default)
-  DEPENDS:=freeradius2-mod-sql \
-  	+PACKAGE_freeradius2-mod-sql-sqlite:libsqlite3
+  DEPENDS:=freeradius2-mod-sql +libsqlite3
   TITLE:=SQLite module
 endef
 

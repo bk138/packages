@@ -17,9 +17,9 @@ PKG_MD5SUM:=00df80a84ec9528fcfb09498075525bc
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
-PKG_BUILD_DEPENDS:=libelf1
 PKG_FIXUP:=autoreconf
 PKG_LIBTOOL_PATHS:=. sntp
+PKG_CHECK_FORMAT_SECURITY:=0
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -43,6 +43,7 @@ define Package/ntpd
 $(call Package/ntpd/Default)
   TITLE+= server
   VARIANT:=nossl
+  USERID:=ntp=123:ntp=123
 endef
 
 define Package/ntpd/description
@@ -56,6 +57,7 @@ $(call Package/ntpd/Default)
   TITLE+= server (with OpenSSL support)
   VARIANT:=ssl
   DEPENDS+= +libopenssl
+  USERID:=ntp=123:ntp=123
 endef
 
 define Package/ntpd-ssl/description

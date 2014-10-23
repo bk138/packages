@@ -4,31 +4,6 @@ SERVICE_USE_PID=1
 
 START=50
 
-setup_firewall() {
-	local port fw
-	config_get port		$1 port
-	test -z "$port" && return
-
-	config_get fwport		$1 "fwport"
-	test "$fwport" = "$port" && return
-
-	#can we remove the old rule?
-	uci add firewall rule
-	uci set firewall.@rule[-1].src=wan
-	uci set firewall.@rule[-1].target=ACCEPT
-	uci set firewall.@rule[-1].proto=tcpudp
-	uci set firewall.@rule[-1].dest_port=$port
-	uci commit firewall
-	/etc/init.d/firewall restart
-
-	uci set ocserv.config.fwport="$port"
-	uci commit ocserv
-}
-
-clear_firewall() {
-	iptables-save | grep -v ocserv-rule | iptables-restore
-}
-
 setup_config() {
 	config_get port         $1 port "4443"
 	config_get max_clients  $1 max_clients "8"
@@ -111,9 +86,6 @@ setup_dns() {
 start() {
 	local hostname iface
 
-	user_exists ocserv 72 || user_add ocserv 72 72 /var/lib/ocserv
-	group_exists ocserv 72 || group_add ocserv 72
-
 	hostname=`uci get ddns.myddns.domain`
 	[ -z "$hostname" ] && hostname=`uci get system.@system[0].hostname`
 
@@ -171,14 +143,11 @@ start() {
 	chmod 600 /var/etc/ocpasswd
 	config_foreach setup_users ocservusers
 
-	setup_firewall config
-
 	service_start /usr/sbin/ocserv -c /var/etc/ocserv.conf
 }
 
 stop() {
 	service_stop /usr/sbin/ocserv
-	clear_firewall
 }
        
 reload() {

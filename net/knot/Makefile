@@ -8,13 +8,16 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=knot
-PKG_VERSION:=1.5.0-rc2
-PKG_RELEASE:=1
+PKG_VERSION:=1.5.3
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_URL:=https://secure.nic.cz/files/knot-dns/
-PKG_MD5SUM:=9a93226c200813ee7bfe27dcf7b6cbc9
+PKG_MD5SUM:=bab73ec83ad7f1d64bb765bf0c72caae
+
+PKG_MAINTAINER:=Daniel Salzman <daniel.salzman@nic.cz>
+PKG_LICENSE:=GPL-2.0+
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_BUILD_PARALLEL:=1
@@ -28,7 +31,6 @@ define Package/knot/Default
 	CATEGORY:=Network
 	TITLE:=Knot DNS
 	URL:=https://www.knot-dns.cz
-	MAINTAINER:=daniel.salzman@nic.cz
 	SUBMENU:=IP Addresses and Names
 	DEPENDS:=+libopenssl +liburcu
 endef
@@ -44,9 +46,27 @@ define Package/knot
 	DEPENDS+=+knot-libknot
 endef
 
-define Package/knot-utils
+define Package/knot-dig
 	$(call Package/knot/Default)
-	TITLE+= (utils)
+	TITLE+= lookup utility
+	DEPENDS+=+knot-libknot
+endef
+
+define Package/knot-host
+	$(call Package/knot/Default)
+	TITLE+= simple DNS lookup utility
+	DEPENDS+=+knot-libknot
+endef
+
+define Package/knot-nsec3hash
+	$(call Package/knot/Default)
+	TITLE+= simple NSEC3 hash utility
+	DEPENDS+=+knot-libknot
+endef
+
+define Package/knot-nsupdate
+	$(call Package/knot/Default)
+	TITLE+= dynamic DNS update utility
 	DEPENDS+=+knot-libknot
 endef
 
@@ -64,8 +84,20 @@ define Package/knot/description
 	High-performance authoritative-only DNS server.
 endef
 
-define Package/knot-utils/description
-	DNS utilities: kdig, khost, knsupdate and knsec3hash.
+define Package/knot-dig/description
+	Knot DNS lookup utility.
+endef
+
+define Package/knot-host/description
+	Knot DNS simple DNS lookup utility.
+endef
+
+define Package/knot-nsec3hash/description
+	Knot DNS simple utility to compute NSEC3 hash.
+endef
+
+define Package/knot-nsupdate/description
+	Knot DNS dynamic DNS update utility.
 endef
 
 define Package/knot-tests/description
@@ -73,9 +105,14 @@ define Package/knot-tests/description
 	Usage: /usr/share/knot/runtests.sh
 endef
 
+define Package/knot/conffiles
+/etc/knot/knot.conf
+endef
+
 CONFIGURE_ARGS += 			\
 	--enable-recvmmsg=no		\
 	--disable-fastparser		\
+	--without-libidn		\
 	--with-rundir=/var/run		\
 	--with-storage=/etc/knot
 
@@ -101,23 +138,35 @@ define Package/knot/install
 
 	$(INSTALL_DIR) 							$(1)/etc/knot
 	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/knot/knot.sample.conf	$(1)/etc/knot/knot.conf
-	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/knot/example.com.zone	$(1)/etc/knot/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/etc/knot/example.com.zone	$(1)/etc/knot/
 
 	$(INSTALL_DIR)				$(1)/etc/init.d
 	$(INSTALL_BIN) ./files/knotd.init	$(1)/etc/init.d/knotd
 endef
 
-define Package/knot-utils/install
+define Package/knot-dig/install
 	$(INSTALL_DIR)						$(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/kdig		$(1)/usr/bin/
+endef
+
+define Package/knot-host/install
+	$(INSTALL_DIR)						$(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/khost		$(1)/usr/bin/
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/knsupdate	$(1)/usr/bin/
+endef
+
+define Package/knot-nsec3hash/install
+	$(INSTALL_DIR)						$(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/knsec3hash	$(1)/usr/bin/
+endef
+
+define Package/knot-nsupdate/install
+	$(INSTALL_DIR)						$(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/knsupdate	$(1)/usr/bin/
 endef
 
 define Package/knot-tests/install
 	$(INSTALL_DIR) 						$(1)/usr/share/knot
-	$(INSTALL_BIN) ./files/runtests.sh			$(1)/usr/share/knot
+	$(INSTALL_BIN) ./files/runtests.sh			$(1)/usr/share/knot/
 
 	$(INSTALL_DIR) 						$(1)/usr/share/knot/tap
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libtap/runtests		$(1)/usr/share/knot/tap/
@@ -129,15 +178,18 @@ define Package/knot-tests/install
 		xargs -I{} $(INSTALL_BIN) -T $(PKG_BUILD_DIR)/tests/.libs/{}	$(1)/usr/share/knot/tests/test_{}
 
 	$(INSTALL_DIR)						$(1)/usr/share/knot/tests/data
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/tests/data/sample_conf	$(1)/usr/share/knot/tests/data/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/tests/data/sample_conf	$(1)/usr/share/knot/tests/data/
 
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/zscanner/tests/.libs/zscanner-tool	$(1)/usr/share/knot/tests/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/zscanner/tests/unittests		$(1)/usr/share/knot/tests/test_zscanner
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/src/zscanner/tests/TESTS		$(1)/usr/share/knot/tests/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/src/zscanner/tests/TESTS		$(1)/usr/share/knot/tests/
 	cp -a $(PKG_BUILD_DIR)/src/zscanner/tests/data				$(1)/usr/share/knot/tests/
 endef
 
 $(eval $(call BuildPackage,knot-libknot))
 $(eval $(call BuildPackage,knot))
-$(eval $(call BuildPackage,knot-utils))
+$(eval $(call BuildPackage,knot-dig))
+$(eval $(call BuildPackage,knot-host))
+$(eval $(call BuildPackage,knot-nsec3hash))
+$(eval $(call BuildPackage,knot-nsupdate))
 $(eval $(call BuildPackage,knot-tests))

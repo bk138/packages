@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 OpenWrt.org
+# Copyright (C) 2011-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,11 +9,13 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pulseaudio
 PKG_VERSION:=5.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=http://freedesktop.org/software/pulseaudio/releases/
 PKG_MD5SUM:=c43749838612f4860465e83ed62ca38e
+PKG_LICENSE:=LGPL-2.1+
+PKG_LICENSE_FILES:=GPL LICENSE
 
 PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=intltool/host
@@ -36,18 +38,11 @@ define Package/pulseaudio/Default
   MAINTAINER:=Peter Wagner <tripolar@gmx.at>
   URL:=http://www.pulseaudio.org
   PROVIDES:=pulseaudio
+  USERID:=pulse=51:pulse=51
 endef
 
 define Package/pulseaudio-daemon
   $(call Package/pulseaudio/Default)
-  VARIANT:=noavahi
-endef
-
-define Package/pulseaudio-daemon-avahi
-  $(call Package/pulseaudio/Default)
-  DEPENDS+=+dbus +libavahi-client +avahi-daemon
-  TITLE+= (avahi)
-  VARIANT:=avahi
 endef
 
 define Package/pulseaudio/Default/description
@@ -58,19 +53,7 @@ define Package/pulseaudio-daemon/description
   $(call Package/pulseaudio/Default/description)
 endef
 
-define Package/pulseaudio-daemon-avahi/description
-  $(call Package/pulseaudio/Default/description)
-  This package is compiled against dbus and avahi.
-endef
-
 define Package/pulseaudio-daemon/conffiles
-/etc/pulse/client.conf
-/etc/pulse/daemon.conf
-/etc/pulse/default.pa
-/etc/pulse/system.pa
-endef
-
-define Package/pulseaudio-daemon-avahi/conffiles
 /etc/pulse/client.conf
 /etc/pulse/daemon.conf
 /etc/pulse/default.pa
@@ -83,7 +66,6 @@ define Package/pulseaudio-tools
   DEPENDS:=+libsndfile pulseaudio
   TITLE:=Tools for Pulseaudio
   URL:=http://www.pulseaudio.org
-  VARIANT:=noavahi
 endef
 
 define Package/pulseaudio-profiles
@@ -116,19 +98,9 @@ CONFIGURE_ARGS += \
 	--disable-lirc \
 	--disable-bluez \
 	--disable-udev \
-	--without-fftw
-
-ifeq ($(BUILD_VARIANT),avahi)
-CONFIGURE_ARGS += \
-	--enable-avahi \
-	--enable-dbus
-endif
-
-ifeq ($(BUILD_VARIANT),noavahi)
-CONFIGURE_ARGS += \
+	--without-fftw \
 	--disable-avahi \
 	--disable-dbus
-endif
 
 CONFIGURE_VARS += \
 	PKG_CONFIG_LIBDIR="$(STAGING_DIR)/usr/lib/pkgconfig"
@@ -196,51 +168,6 @@ define Package/pulseaudio-daemon/install
 	chmod -R 0644 $(1)/etc/pulse/*
 endef
 
-define Package/pulseaudio-daemon-avahi/install
-	$(INSTALL_DIR) \
-		$(1)/etc/pulse \
-		$(1)/etc/init.d \
-		$(1)/usr/bin \
-		$(1)/usr/lib \
-		$(1)/usr/lib/pulseaudio \
-		$(1)/usr/lib/pulse-$(PKG_VERSION)/modules \
-		$(1)/etc/dbus-1/system.d
-
-	$(INSTALL_BIN) \
-		$(PKG_INSTALL_DIR)/usr/bin/pulseaudio \
-		$(1)/usr/bin/pulseaudio
-
-	$(INSTALL_BIN) \
-		./files/pulseaudio.init \
-		$(1)/etc/init.d/pulseaudio
-
-	$(INSTALL_CONF) \
-		$(PKG_INSTALL_DIR)/etc/pulse/* \
-		$(1)/etc/pulse
-
-	$(CP) \
-		$(PKG_INSTALL_DIR)/usr/lib/*.so* \
-		$(1)/usr/lib/
-
-	$(CP) \
-		$(PKG_INSTALL_DIR)/usr/lib/pulseaudio/* \
-		$(1)/usr/lib/pulseaudio/
-
-	$(CP) \
-		$(PKG_INSTALL_DIR)/usr/lib/pulse-$(PKG_VERSION)/modules/lib*.so \
-		$(1)/usr/lib/
-
-	$(CP) \
-		$(PKG_INSTALL_DIR)/usr/lib/pulse-$(PKG_VERSION)/modules/module*.so \
-		$(1)/usr/lib/pulse-$(PKG_VERSION)/modules/
-
-	$(INSTALL_CONF) \
-		$(PKG_INSTALL_DIR)/etc/dbus-1/system.d/pulseaudio-system.conf \
-		$(1)/etc/dbus-1/system.d/pulseaudio-system.conf
-
-	chmod -R 0644 $(1)/etc/pulse/* $(1)/etc/dbus-1/system.d/pulseaudio-system.conf
-endef
-
 define Package/pulseaudio-tools/install
 	$(INSTALL_DIR) \
 		$(1)/usr/bin
@@ -265,6 +192,5 @@ define Package/pulseaudio-profiles/install
 endef
 
 $(eval $(call BuildPackage,pulseaudio-daemon))
-$(eval $(call BuildPackage,pulseaudio-daemon-avahi))
 $(eval $(call BuildPackage,pulseaudio-tools))
 $(eval $(call BuildPackage,pulseaudio-profiles))

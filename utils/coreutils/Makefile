@@ -34,7 +34,6 @@ COREUTILS_APPLETS := \
 
 DEPENDS_sort = +libpthread
 DEPENDS_timeout = +librt
-DEPENDS_uptime = +libelf1
 DEPENDS_expr = +libgmp
 DEPENDS_factor = +libgmp
 
@@ -83,6 +82,7 @@ ifneq ($(CONFIG_USE_UCLIBC),)
 endif
 
 CONFIGURE_ARGS += \
+	--disable-xattr \
 	--enable-install-program=su
 
 define Build/Compile

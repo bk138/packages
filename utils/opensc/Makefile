@@ -10,6 +10,8 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=opensc
 PKG_VERSION:=20140317
 PKG_RELEASE:=1
+PKG_LICENSE:=LGPL-2.1+
+PKG_LICENSE_FILES:=COPYING
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
 
 PKG_RELEASE=$(PKG_SOURCE_VERSION)
@@ -59,6 +61,7 @@ define Package/libpkcs11-spy
   CATEGORY:=Libraries
   TITLE:=PKCS11 spying wrapper
   URL:=https://github.com/OpenSC/OpenSC/wiki
+  DEPENDS:=+libopenssl +libpthread
 endef
 
 define Package/libpkcs11-spy/dscription

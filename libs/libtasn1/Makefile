@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libtasn1
-PKG_VERSION:=3.6
+PKG_VERSION:=4.2
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=ftp://ftp.gnu.org/gnu/libtasn1
-PKG_MD5SUM:=6ed38e161e11013054f2a2bb4c4da449
+PKG_MD5SUM:=414df906df421dee0a5cf7548788d153
 
 #PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
@@ -24,6 +24,7 @@ define Package/libtasn1
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=An ASN.1 and DER structures manipulation library
+  MAINTAINER:=Nikos Mavrogiannopoulos <n.mavrogiannopoulos@gmail.com>
   URL:=ftp://ftp.gnu.org/gnu/libtasn1/
 endef
 
