@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2011 OpenWrt.org
+# Copyright (C) 2006-2015 OpenWrt.org
 # Copyright (C) 2015 Christian Beier <dontmind@freeshell.org>
 #
 # This is free software, licensed under the GNU General Public License v2.
@@ -25,10 +25,11 @@ PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
-PKG_BUILD_DEPENDS:=protobuf/host ola/host
+HOST_BUILD_DEPENDS:=protobuf/host
+PKG_BUILD_DEPENDS:=ola/host
 
+include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
-
 
 define Package/ola
   SECTION:=net
@@ -40,19 +41,20 @@ define Package/ola
 endef
 
 define Package/ola/description
-  OLA (Open Lighting Architecture) is a framework that allows applications to 
+  OLA (Open Lighting Architecture) is a framework that allows applications to
   send and receive DMX512, using various hardware devices and 'DMX over IP'
   protocols. It enables software controllers talk to DMX hardware.
 endef
 
+CONFIGURE_ARGS += \
+	--disable-dependency-tracking \
+	--disable-static \
+	--disable-fatal-warnings \
+	--disable-unittests \
+	--disable-http \
+	--with-ola-protoc=$(STAGING_DIR_HOST)/bin/ola_protoc
 
-include $(INCLUDE_DIR)/host-build.mk
-
-# When building the host part, disable as much as possible to speed up
-# the configure step and avoid missing host dependencies.
-# Stolen from http://git.buildroot.net/buildroot/commit/?id=66056a5179ef49f2ec10ba5d7fbd1a58863d1350
-define Host/Configure
-   $(call Host/Configure/Default,\
+HOST_CONFIGURE_ARGS += \
 	--disable-all-plugins \
 	--disable-slp \
 	--disable-osc \
@@ -63,13 +65,12 @@ define Host/Configure
 	--disable-examples \
 	--disable-unittests \
 	--disable-doxygen-html \
-	--disable-doxygen-doc)
-endef
+	--disable-doxygen-doc
 
 # only build the ola_protoc thingy
 define Host/Compile
 	cd $(HOST_BUILD_DIR); \
-	    $(MAKE) protoc/ola_protoc
+		$(MAKE) protoc/ola_protoc
 endef
 
 # only need ola_protoc
@@ -78,37 +79,25 @@ define Host/Install
 	$(CP) $(HOST_BUILD_DIR)/protoc/ola_protoc $(STAGING_DIR_HOST)/bin/
 endef
 
-$(eval $(call HostBuild))
-
-
-
-define Build/Configure
-  $(call Build/Configure/Default,\
-	--disable-dependency-tracking \
-	--disable-static \
-	--disable-fatal-warnings \
-	--disable-unittests \
-	--disable-http  \
-	--with-ola-protoc=$(STAGING_DIR_HOST)/bin/ola_protoc)
-endef
-
-
 define Build/InstallDev
-	mkdir -p $(1)/usr/include
+	$(INSTALL_DIR) $(1)/usr/include
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/ola $(1)/usr/include/
-	mkdir -p $(1)/usr/include
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/olad $(1)/usr/include/
-	mkdir -p $(1)/usr/lib
+
+	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so* $(1)/usr/lib/
 endef
 
 define Package/ola/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin
+
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so* $(1)/usr/lib
+
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/olad.init $(1)/etc/init.d/olad
+
 	$(INSTALL_DIR) $(1)/usr/share/ola/pids
 	$(CP) $(PKG_INSTALL_DIR)/usr/share/ola/pids/* $(1)/usr/share/ola/pids
 endef
@@ -117,12 +106,10 @@ define Package/ola/postinst
 #!/bin/sh
 
 # make sure the conf dir exists and is writeable by the group olad uses
-mkdir -p /etc/ola
-chgrp nogroup /etc/ola
-chmod 775 $(1)/etc/ola
-
-exit 0
+mkdir -p $${IPKG_INSTROOT}/etc/ola
+chgrp nogroup $${IPKG_INSTROOT}/etc/ola
+chmod 775 $${IPKG_INSTROOT}/etc/ola
 endef
 
-
+$(eval $(call HostBuild))
 $(eval $(call BuildPackage,ola))
