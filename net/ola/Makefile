@@ -9,13 +9,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ola
-PKG_VERSION:=0.9.3
+PKG_VERSION:=0.9.5
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/OpenLightingProject/ola.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=d949ab88ab2c12d4d94b50a0a0df633d634f08fd
+PKG_SOURCE_VERSION:=5d09e83870bfd0c1f3f12c00b50d1836e9c43828
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 PKG_LICENSE:=LGPL-2.1+
 
@@ -52,7 +52,7 @@ CONFIGURE_ARGS += \
 	--disable-fatal-warnings \
 	--disable-unittests \
 	--disable-http \
-	--with-ola-protoc=$(STAGING_DIR_HOST)/bin/ola_protoc
+	 --with-ola-protoc-plugin=$(HOST_BUILD_DIR)/protoc/ola_protoc_plugin
 
 HOST_CONFIGURE_ARGS += \
 	--disable-all-plugins \
@@ -70,14 +70,13 @@ HOST_CONFIGURE_ARGS += \
 # only build the ola_protoc thingy
 define Host/Compile
 	cd $(HOST_BUILD_DIR); \
-		$(MAKE) protoc/ola_protoc
+		$(MAKE) protoc/ola_protoc_plugin
 endef
 
-# only need ola_protoc
+# nothing to install for host part
 define Host/Install
-	$(INSTALL_DIR) $(STAGING_DIR_HOST)/bin
-	$(CP) $(HOST_BUILD_DIR)/protoc/ola_protoc $(STAGING_DIR_HOST)/bin/
 endef
+
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include
