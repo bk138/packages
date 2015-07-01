@@ -3,11 +3,16 @@
 
 # Build environment
 HOST_PERL_PREFIX:=$(STAGING_DIR_HOST)/usr
-ifneq ($(CONFIG_USE_EGLIBC),)
+ifneq ($(CONFIG_USE_GLIBC),)
 	EXTRA_LIBS:=bsd
 	EXTRA_LIBDIRS:=$(STAGING_DIR)/lib
 endif
 PERL_CMD:=$(STAGING_DIR_HOST)/usr/bin/perl5.20.0
+
+MOD_CFLAGS_PERL:=$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)
+ifdef CONFIG_PERL_THREADS
+	MOD_CFLAGS_PERL+= -D_REENTRANT -D_GNU_SOURCE
+endif
 
 # Module install prefix
 PERL_SITELIB:=/usr/lib/perl5/5.20
@@ -54,7 +59,7 @@ define perlmod/Configure
 		$(1) \
 		AR=ar \
 		CC=$(GNU_TARGET_NAME)-gcc \
-		CCFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
+		CCFLAGS="$(MOD_CFLAGS_PERL)" \
 		CCCDLFLAGS=-fPIC \
 		CCDLFLAGS=-Wl,-E \
 		DLEXT=so \

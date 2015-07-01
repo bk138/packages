@@ -9,13 +9,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=LVM2
-PKG_VERSION:=2.02.114
+PKG_VERSION:=2.02.117
 PKG_RELEASE:=1
 PKG_LICENSE:=GPL-2.0 LGPL-2.1
 
 PKG_SOURCE:=$(PKG_NAME).$(PKG_VERSION).tgz
 PKG_SOURCE_URL:=ftp://sources.redhat.com/pub/lvm2
-PKG_MD5SUM:=de826e0736070aed70148ea5ec0ecff9
+PKG_MD5SUM:=ab5889dae7924b44ed2444161058a419
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME).$(PKG_VERSION)
 
@@ -76,7 +76,7 @@ define Package/lvm2/install
 	$(INSTALL_DIR) $(1)/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/lvm $(1)/sbin
 	$(INSTALL_DIR) $(1)/etc/lvm
-	$(SED) '/^[[:space:]]*\(#\|$$$$\)/d' $(PKG_BUILD_DIR)/conf/example.conf
+	$(SED) '/^[[:space:]]*\(#\|$$$$\)/d; /cache_dir/s@.*@    cache_dir = "/tmp/lvm/cache"@' $(PKG_BUILD_DIR)/conf/example.conf
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/conf/example.conf $(1)/etc/lvm/lvm.conf
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/lvm2.init $(1)/etc/init.d/lvm2

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2014 OpenWrt.org
+# Copyright (C) 2008-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gst1-plugins-base
-PKG_VERSION:=1.4.4
+PKG_VERSION:=1.4.5
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=W. Michael Petullo <mike@flyn.org>
@@ -19,9 +19,9 @@ PKG_LICENSE_FILES:=COPYING.LIB COPYING
 PKG_BUILD_DIR:=$(BUILD_DIR)/gst-plugins-base-$(PKG_VERSION)
 PKG_SOURCE:=gst-plugins-base-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=http://gstreamer.freedesktop.org/src/gst-plugins-base/
-PKG_MD5SUM:=0c42eca8f9e4efd56d2ce8e9249ce4a1
+PKG_MD5SUM:=357165af625c0ca353ab47c5d843920e
 
-PKG_BUILD_DEPENDS:= libgstreamer1 liboil
+PKG_BUILD_DEPENDS:= libgstreamer1
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_gst1-mod-alsa \
 	CONFIG_PACKAGE_gst1-mod-app \
@@ -33,6 +33,7 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_gst1-mod-ogg \
 	CONFIG_PACKAGE_gst1-mod-tcp \
 	CONFIG_PACKAGE_gst1-mod-theora \
+	CONFIG_PACKAGE_gst1-mod-videoconvert \
 	CONFIG_PACKAGE_gst1-mod-videotestsrc \
 	CONFIG_PACKAGE_gst1-mod-volume \
 	CONFIG_PACKAGE_gst1-mod-vorbis \
@@ -118,31 +119,26 @@ CONFIGURE_ARGS += \
 	--disable-examples \
 	\
 	$(call GST_COND_SELECT,alsa) \
-	--disable-alsa-test \
 	$(call GST_COND_SELECT,app) \
 	$(call GST_COND_SELECT,audioconvert) \
 	$(call GST_COND_SELECT,audiorate) \
 	$(call GST_COND_SELECT,audioresample) \
 	$(call GST_COND_SELECT,audiotestsrc) \
 	--disable-cdparanoia \
-	--disable-ffmpegcolorspace \
 	--disable-freetypetest \
 	$(call GST_COND_SELECT,gio) \
-	--disable-gnome_vfs \
-	--disable-gst_v4l \
 	--disable-libvisual \
 	$(call GST_COND_SELECT,ogg) \
-	--disable-oggtest \
 	--disable-pango \
 	--disable-subparse \
 	$(call GST_COND_SELECT,tcp) \
 	$(call GST_COND_SELECT,theora) \
-	--disable-videorate \
-	--disable-videoscale \
+	$(call GST_COND_SELECT,videorate) \
+	$(call GST_COND_SELECT,videoscale) \
+	$(call GST_COND_SELECT,videoconvert) \
 	$(call GST_COND_SELECT,videotestsrc) \
 	$(call GST_COND_SELECT,volume) \
 	$(call GST_COND_SELECT,vorbis) \
-	--disable-vorbistest \
 	--disable-x \
 	--disable-xshm \
 	--disable-xvideo \
@@ -223,6 +219,7 @@ define GstBuildLibrary
   $$(eval $$(call BuildPackage,libgst1$(1)))
 endef
 
+$(eval $(call GstBuildLibrary,allocators,allocators,,))
 $(eval $(call GstBuildLibrary,app,app,,))
 $(eval $(call GstBuildLibrary,audio,audio,tag,))
 $(eval $(call GstBuildLibrary,fft,FFT,,))
@@ -281,6 +278,9 @@ $(eval $(call GstBuildPlugin,ogg,Ogg,riff tag pbutils video,,+libogg))
 $(eval $(call GstBuildPlugin,tcp,TCP,,,))
 $(eval $(call GstBuildPlugin,theora,Theora,tag video,,+libogg +libtheora))
 $(eval $(call GstBuildPlugin,typefindfunctions,'typefind' functions,audio pbutils tag video,,))
+$(eval $(call GstBuildPlugin,videoconvert,video format conversion,video,,))
+$(eval $(call GstBuildPlugin,videorate,Adjusts video frames,video,,))
+$(eval $(call GstBuildPlugin,videoscale,Resizes video,video,,))
 $(eval $(call GstBuildPlugin,videotestsrc,video test,video,,+liboil))
 $(eval $(call GstBuildPlugin,volume,volume,audio controller,,+liboil))
 $(eval $(call GstBuildPlugin,vorbis,Vorbis,audio tag,ogg,+libvorbis))

@@ -8,15 +8,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=squid
-PKG_VERSION:=3.4.10
-PKG_RELEASE:=1
+PKG_VERSION:=3.5.2
+PKG_RELEASE:=2
 
 PKG_LICENSE:=GPL-2.0
 PKG_MAINTAINER:=Luka Perkov <luka@openwrt.org>
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=http://www.squid-cache.org/Versions/v3/3.4/
-PKG_MD5SUM:=3136edfe9bc2458e725671b0d2455702
+PKG_SOURCE_URL:=http://www.squid-cache.org/Versions/v3/3.5/
+PKG_MD5SUM:=0330ec9f69e333c2a81fa4502ba96a22
 
 PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
@@ -33,7 +33,7 @@ endef
 define Package/squid
   $(call Package/squid/Default)
   MENU:=1
-  DEPENDS:=+libopenssl +libpthread +librt +libltdl +libstdcpp
+  DEPENDS:=+libopenssl +libpthread +librt +libltdl +libstdcpp +libgnutls
   TITLE:=full-featured Web proxy cache
 endef
 
@@ -88,7 +88,8 @@ CONFIGURE_ARGS += \
 	--disable-auth-basic \
 	--disable-arch-native \
 	--with-krb5-config=no \
-	--without-libcap
+	--without-libcap \
+	--without-netfilter-conntrack \
 
 CONFIGURE_VARS += \
 	ac_cv_header_linux_netfilter_ipv4_h=yes \

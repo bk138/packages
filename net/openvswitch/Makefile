@@ -50,7 +50,8 @@ endef
 define Package/openvswitch
   $(call Package/openvswitch/Default)
   TITLE:=Open vSwitch Userspace Package
-  DEPENDS:=+libpcap +libopenssl +librt +libatomic +kmod-openvswitch
+  DEPENDS:=+libpcap +libopenssl +librt +libatomic +kmod-openvswitch \
+           @(LINUX_3_8||LINUX_3_10||LINUX_3_13||LINUX_3_14)
 endef
 
 define Package/openvswitch/description
@@ -94,7 +95,8 @@ define KernelPackage/openvswitch
   SUBMENU:=Network Support
   TITLE:=Open vSwitch Kernel Package
   KCONFIG:=CONFIG_BRIDGE
-  DEPENDS:=+kmod-stp +kmod-ipv6 +kmod-gre +kmod-lib-crc32c +kmod-vxlan
+  DEPENDS:=+kmod-stp +kmod-ipv6 +kmod-gre +kmod-lib-crc32c +kmod-vxlan \
+           @(LINUX_3_8||LINUX_3_10||LINUX_3_13||LINUX_3_14)
   FILES:= \
 	$(PKG_BUILD_DIR)/datapath/linux/openvswitch.$(LINUX_KMOD_SUFFIX)
   AUTOLOAD:=$(call AutoLoad,21,openvswitch)

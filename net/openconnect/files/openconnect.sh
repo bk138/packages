@@ -10,6 +10,9 @@ proto_openconnect_init_config() {
 	proto_config_add_string "serverhash"
 	proto_config_add_string "authgroup"
 	proto_config_add_string "password"
+	proto_config_add_string "token_mode"
+	proto_config_add_string "token_secret"
+	proto_config_add_string "interface"
 	no_device=1
 	available=1
 }
@@ -17,14 +20,14 @@ proto_openconnect_init_config() {
 proto_openconnect_setup() {
 	local config="$1"
 
-	json_get_vars server port username serverhash authgroup password vgroup token_mode token_secret
+	json_get_vars server port username serverhash authgroup password interface token_mode token_secret
 
 	grep -q tun /proc/modules || insmod tun
 
 	logger -t openconnect "initializing..."
 	serv_addr=
 	for ip in $(resolveip -t 10 "$server"); do
-		( proto_add_host_dependency "$config" "$ip" )
+		( proto_add_host_dependency "$config" "$ip" $interface )
 		serv_addr=1
 	done
 	[ -n "$serv_addr" ] || {
@@ -38,19 +41,17 @@ proto_openconnect_setup() {
 
 	cmdline="$server$port -i vpn-$config --non-inter --syslog --script /lib/netifd/vpnc-script"
 
-	# migrate to new config files
-	[ -f /etc/openconnect/user-cert-vpn-$config.pem ] && mv "/etc/openconnect/user-cert-vpn-$config.pem" "/etc/config/openconnect-user-cert-vpn-$config.pem"
-	[ -f /etc/openconnect/user-key-vpn-$config.pem ] && mv "/etc/openconnect/user-key-vpn-$config.pem" "/etc/config/openconnect-user-key-vpn-$config.pem"
-	[ -f /etc/openconnect/ca-vpn-$config.pem ] && mv "/etc/openconnect/ca-vpn-$config.pem" "/etc/config/openconnect-ca-vpn-$config.pem"
+	# migrate to standard config files
+	[ -f "/etc/config/openconnect-user-cert-vpn-$config.pem" ] && mv "/etc/config/openconnect-user-cert-vpn-$config.pem" "/etc/openconnect/user-cert-vpn-$config.pem"
+	[ -f "/etc/config/openconnect-user-key-vpn-$config.pem" ] && mv "/etc/config/openconnect-user-key-vpn-$config.pem" "/etc/openconnect/user-key-vpn-$config.pem"
+	[ -f "/etc/config/openconnect-ca-vpn-$config.pem" ] && mv "/etc/config/openconnect-ca-vpn-$config.pem" "/etc/openconnect/ca-vpn-$config.pem"
 
-	# read new config files
-	[ -f /etc/config/openconnect-user-cert-vpn-$config.pem ] && append cmdline "-c /etc/config/openconnect-user-cert-vpn-$config.pem"
-	[ -f /etc/config/openconnect-user-key-vpn-$config.pem ] && append cmdline "--sslkey /etc/config/openconnect-user-key-vpn-$config.pem"
-	[ -f /etc/config/openconnect-ca-vpn-$config.pem ] && {
+	[ -f /etc/openconnect/user-cert-vpn-$config.pem ] && append cmdline "-c /etc/openconnect/user-cert-vpn-$config.pem"
+	[ -f /etc/openconnect/user-key-vpn-$config.pem ] && append cmdline "--sslkey /etc/openconnect/user-key-vpn-$config.pem"
+	[ -f /etc/openconnect/ca-vpn-$config.pem ] && {
 		append cmdline "--cafile /etc/openconnect/ca-vpn-$config.pem"
 		append cmdline "--no-system-trust"
 	}
-
 	[ -n "$serverhash" ] && {
 		append cmdline " --servercert=$serverhash"
 		append cmdline "--no-system-trust"
@@ -59,7 +60,8 @@ proto_openconnect_setup() {
 	[ -n "$username" ] && append cmdline "-u $username"
 	[ -n "$password" ] && {
 		umask 077
-		pwfile="/var/run/openconnect-$config.passwd"
+		mkdir -p /var/etc
+		pwfile="/var/etc/openconnect-$config.passwd"
 		echo "$password" > "$pwfile"
 		append cmdline "--passwd-on-stdin"
 	}
@@ -80,7 +82,7 @@ proto_openconnect_setup() {
 proto_openconnect_teardown() {
 	local config="$1"
 
-	pwfile="/var/run/openconnect-$config.passwd"
+	pwfile="/var/etc/openconnect-$config.passwd"
 
 	rm -f $pwfile
 	logger -t openconnect "bringing down openconnect"
