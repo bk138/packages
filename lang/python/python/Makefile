@@ -12,11 +12,13 @@ include ./files/python-version.mk
 
 PKG_NAME:=python
 PKG_VERSION:=$(PYTHON_VERSION).$(PYTHON_VERSION_MICRO)
-PKG_RELEASE:=6
+# XXX: reset PKG_RELEASE to 1 only if Python's pip & setuptools versions have also bumped;
+#      otherwise, keep bumping PKG_RELEASE
+PKG_RELEASE:=5
 
 PKG_SOURCE:=Python-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://www.python.org/ftp/python/$(PKG_VERSION)
-PKG_HASH:=35d543986882f78261f97787fd3e06274bfa6df29fac9b4a94f73930ff98f731
+PKG_HASH:=71ffb26e09e78650e424929b2b457b9c912ac216576e6bd9e7d204ed03296a66
 
 PKG_LICENSE:=PSF
 PKG_LICENSE_FILES:=LICENSE Modules/_ctypes/libffi_msvc/LICENSE Modules/_ctypes/darwin/LICENSE Modules/_ctypes/libffi/LICENSE Modules/_ctypes/libffi_osx/LICENSE Tools/pybench/LICENSE
@@ -27,6 +29,7 @@ include ./files/python-host.mk
 # For PyPackage
 include ./files/python-package.mk
 
+PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 HOST_BUILD_PARALLEL:=1
@@ -34,7 +37,9 @@ HOST_BUILD_PARALLEL:=1
 PKG_BUILD_DIR:=$(BUILD_DIR)/Python-$(PKG_VERSION)
 HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/Python-$(PKG_VERSION)
 
-PKG_CONFIG_DEPENDS:=CONFIG_PACKAGE_python-setuptools CONFIG_PACKAGE_python-pip
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_PACKAGE_python-setuptools CONFIG_PACKAGE_python-pip \
+	CONFIG_PYTHON_BLUETOOTH_SUPPORT
 
 PKG_BUILD_DEPENDS:=python/host
 HOST_BUILD_DEPENDS:=bzip2/host expat/host
@@ -60,16 +65,6 @@ define Package/python/Default/description
  the development of higher quality, more maintainable code.
 endef
 
-define Package/python-pip-conf
-$(call Package/python/Default)
-  TITLE:=Configuration file for pip/pip3
-  URL:=https://pip.pypa.io
-endef
-
-define Package/python-pip-conf/description
- Configuration file for pip/pip3
-endef
-
 define Package/python-base
 $(call Package/python/Default)
   TITLE:=Python $(PYTHON_VERSION) interpreter
@@ -84,7 +79,11 @@ endef
 define Package/python-light
 $(call Package/python/Default)
   TITLE:=Python $(PYTHON_VERSION) light installation
-  DEPENDS:=+python-base +libffi +libbz2
+  DEPENDS:=+python-base +libffi +libbz2 +PYTHON_BLUETOOTH_SUPPORT:bluez-libs
+endef
+
+define Package/python-light/config
+  source "$(SOURCE)/Config-python-light.in"
 endef
 
 define Package/python-light/description
@@ -145,6 +144,10 @@ PYTHON_FOR_BUILD:= \
 	_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata \
 	$(HOST_PYTHON_BIN)
 
+DISABLE_BLUETOOTH:= \
+    ac_cv_header_bluetooth_bluetooth_h=no \
+    ac_cv_header_bluetooth_h=no
+
 CONFIGURE_ARGS+= \
 	--sysconfdir=/etc \
 	--enable-shared \
@@ -153,6 +156,7 @@ CONFIGURE_ARGS+= \
 	--with-system-ffi \
 	--with-ensurepip=no \
 	--without-pymalloc \
+	$(if $(CONFIG_PYTHON_BLUETOOTH_SUPPORT),,$(DISABLE_BLUETOOTH)) \
 	PYTHON_FOR_BUILD="$(PYTHON_FOR_BUILD)" \
 	$(ENABLE_IPV6) \
 	CONFIG_SITE="$(PKG_BUILD_DIR)/config.site" \
@@ -188,6 +192,16 @@ define Build/Compile
 	$(call Build/Compile/python-pip)
 endef
 
+define Build/InstallMkFiles
+	$(INSTALL_DIR) $(STAGING_DIR)/mk/
+	$(INSTALL_DATA) \
+		./files/python-package.mk \
+		./files/python-host.mk \
+		./files/python-version.mk \
+		./files/python-package-install.sh \
+		$(STAGING_DIR)/mk/
+endef
+
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/ $(1)/usr/lib/ $(1)/usr/lib/pkgconfig
 	$(INSTALL_DIR) $(1)/usr/lib/python$(PYTHON_VERSION)/
@@ -206,6 +220,7 @@ define Build/InstallDev
 	$(CP) \
 		$(PKG_INSTALL_DIR)/usr/lib/python$(PYTHON_VERSION)/config \
 		$(1)/usr/lib/python$(PYTHON_VERSION)/
+	$(call Build/InstallMkFiles)
 endef
 
 PYTHON_BASE_LIB_FILES:= \
@@ -265,11 +280,6 @@ define PyPackage/python/filespec
 -|$(PYTHON_PKG_DIR)
 endef
 
-define Package/python-pip-conf/install
-	$(INSTALL_DIR) $(1)/etc
-	$(CP) ./files/pip.conf $(1)/etc
-endef
-
 HOST_LDFLAGS += \
 	-Wl,--no-as-needed -lrt \
 	$$$$(pkg-config --static --libs libcrypto libssl)
@@ -285,20 +295,15 @@ HOST_CONFIGURE_ARGS+= \
 	--with-ensurepip=install \
 	CONFIG_SITE=
 
+define Host/Compile
+	$(call Host/Compile/Default,python Parser/pgen sharedmods)
+endef
+
 define Host/Install
+	$(call Build/InstallMkFiles)
 	$(MAKE) -C $(HOST_BUILD_DIR) install
-	$(INSTALL_DIR) $(HOST_PYTHON_DIR)/bin/ $(STAGING_DIR)/mk/
+	$(INSTALL_DIR) $(HOST_PYTHON_DIR)/bin/
 	$(INSTALL_BIN) $(HOST_BUILD_DIR)/Parser/pgen $(HOST_PYTHON_DIR)/bin/pgen2
-	# Install these mk files in the Host/Install phase ;
-	# The Build/InstallDev rule is activated only for target builds.
-	# But if someone needs only the host Python, then
-	# these files need to be installed in this phase, and not Build/InstallDev
-	$(INSTALL_DATA) \
-		./files/python-package.mk \
-		./files/python-host.mk \
-		./files/python-version.mk \
-		./files/python-package-install.sh \
-		$(STAGING_DIR)/mk/
 endef
 
 $(eval $(call HostBuild))
@@ -312,8 +317,6 @@ $(foreach package, $(PYTHON_PACKAGES),  \
 $(eval $(call PyPackage,python-base))
 $(eval $(call PyPackage,python-light))
 $(eval $(call PyPackage,python))
-
-$(eval $(call BuildPackage,python-pip-conf))
 
 $(eval $(call BuildPackage,python-base))
 $(eval $(call BuildPackage,python-light))

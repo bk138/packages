@@ -16,12 +16,12 @@ PYTHON_VERSION_MICRO:=$(PYTHON3_VERSION_MICRO)
 PKG_NAME:=python3
 # XXX: reset PKG_RELEASE to 1 only if Python's pip & setuptools versions have also bumped;
 #      otherwise, keep bumping PKG_RELEASE
-PKG_RELEASE:=5
+PKG_RELEASE:=11
 PKG_VERSION:=$(PYTHON_VERSION).$(PYTHON_VERSION_MICRO)
 
 PKG_SOURCE:=Python-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://www.python.org/ftp/python/$(PKG_VERSION)
-PKG_HASH:=9229773be41ed144370f47f0f626a1579931f5a390f1e8e3853174d52edd64a9
+PKG_HASH:=cda7d967c9a4bfa52337cdf551bcc5cff026b6ac50a8834e568ce4a794ca81da
 
 PKG_LICENSE:=PSF
 PKG_LICENSE_FILES:=LICENSE Modules/_ctypes/libffi_msvc/LICENSE Modules/_ctypes/darwin/LICENSE Modules/_ctypes/libffi/LICENSE Modules/_ctypes/libffi_osx/LICENSE Tools/pybench/LICENSE
@@ -32,6 +32,7 @@ include ./files/python3-host.mk
 # For Py3Package
 include ./files/python3-package.mk
 
+PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 HOST_BUILD_PARALLEL:=1
@@ -39,7 +40,9 @@ HOST_BUILD_PARALLEL:=1
 PKG_BUILD_DIR:=$(BUILD_DIR)/Python-$(PKG_VERSION)
 HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/Python-$(PKG_VERSION)
 
-PKG_CONFIG_DEPENDS:=CONFIG_PACKAGE_python3-setuptools CONFIG_PACKAGE_python3-pip
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_PACKAGE_python3-setuptools CONFIG_PACKAGE_python3-pip \
+	CONFIG_PYTHON3_BLUETOOTH_SUPPORT
 
 PKG_BUILD_DEPENDS:=python3/host
 HOST_BUILD_DEPENDS:=bzip2/host expat/host libffi/host
@@ -79,7 +82,11 @@ endef
 define Package/python3-light
 $(call Package/python3/Default)
   TITLE:=Python $(PYTHON_VERSION) light installation
-  DEPENDS:=+python3-base +libffi +libbz2
+  DEPENDS:=+python3-base +libffi +libbz2 +PYTHON3_BLUETOOTH_SUPPORT:bluez-libs
+endef
+
+define Package/python3-light/config
+  source "$(SOURCE)/Config-python3-light.in"
 endef
 
 define Package/python3-light/description
@@ -141,6 +148,10 @@ PYTHON_FOR_BUILD:= \
 	_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata \
 	$(HOST_PYTHON3_BIN)
 
+DISABLE_BLUETOOTH:= \
+	ac_cv_header_bluetooth_bluetooth_h=no \
+	ac_cv_header_bluetooth_h=no
+
 CONFIGURE_ARGS+= \
 	--sysconfdir=/etc \
 	--enable-shared \
@@ -149,6 +160,7 @@ CONFIGURE_ARGS+= \
 	--with-system-ffi \
 	--with-ensurepip=no \
 	--without-pymalloc \
+	$(if $(CONFIG_PYTHON3_BLUETOOTH_SUPPORT),,$(DISABLE_BLUETOOTH)) \
 	PYTHON_FOR_BUILD="$(PYTHON_FOR_BUILD)" \
 	$(ENABLE_IPV6) \
 	CONFIG_SITE="$(PKG_BUILD_DIR)/config.site" \
@@ -184,6 +196,16 @@ define Build/Compile
 	$(call Build/Compile/python3-pip)
 endef
 
+define Build/InstallMkFiles
+	$(INSTALL_DIR) $(STAGING_DIR)/mk/
+	$(INSTALL_DATA) \
+		./files/python3-package.mk \
+		./files/python3-host.mk \
+		./files/python3-version.mk \
+		./files/python3-package-install.sh \
+		$(STAGING_DIR)/mk/
+endef
+
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/ $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/usr/lib/python$(PYTHON_VERSION)/
@@ -197,6 +219,7 @@ define Build/InstallDev
 	$(CP) \
 		$(PKG_INSTALL_DIR)/usr/lib/python$(PYTHON_VERSION)/config-$(PYTHON_VERSION) \
 		$(1)/usr/lib/python$(PYTHON_VERSION)/
+	$(call Build/InstallMkFiles)
 endef
 
 PYTHON3_BASE_LIB_FILES:= \
@@ -274,21 +297,10 @@ define Host/Compile
 endef
 
 define Host/Install
+	$(call Build/InstallMkFiles)
 	$(MAKE) -C $(HOST_BUILD_DIR) install
-
-	$(INSTALL_DIR) $(HOST_PYTHON3_DIR)/bin/ $(STAGING_DIR)/mk/
+	$(INSTALL_DIR) $(HOST_PYTHON3_DIR)/bin/
 	$(INSTALL_BIN) $(HOST_BUILD_DIR)/Parser/pgen $(HOST_PYTHON3_DIR)/bin/pgen3
-
-	# Install these mk files in the Host/Install phase ;
-	# The Build/InstallDev rule is activated only for target builds.
-	# But if someone needs only the host Python, then
-	# these files need to be installed in this phase, and not Build/InstallDev
-	$(INSTALL_DATA) \
-		./files/python3-package.mk \
-		./files/python3-host.mk \
-		./files/python3-version.mk \
-		./files/python3-package-install.sh \
-		$(STAGING_DIR)/mk/
 endef
 
 $(eval $(call HostBuild))

@@ -13,7 +13,7 @@ PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://rutschle.net/tech/sslh/
-PKG_MD5SUM:=0e3568d5d234516c634d4df156473298
+PKG_HASH:=1601a5b377dcafc6b47d2fbb8d4d25cceb83053a4adcc5874d501a2d5a7745ad
 PKG_LICENSE:=GPL-2.0+
 PKG_LICENSE_FILES:=COPYING
 
@@ -34,19 +34,8 @@ define Package/sslh/conffiles
 /etc/sslh.conf
 endef
 
-define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) \
-		CC="$(TARGET_CC)" \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		CPPFLAGS="$(TARGET_CPPFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
-		ENABLE_REGEX=1 \
-		USELIBCONFIG=1 \
-		USELIBWRAP= \
-		USELIBPCRE= \
-		$(if $(CONFIG_USE_GLIBC),USELIBPCRE=,USELIBPCRE=1)\
-		all
-endef
+MAKE_FLAGS += \
+  $(if $(CONFIG_USE_GLIBC),USELIBPCRE=,USELIBPCRE=1)
 
 define Package/sslh/install
 	$(INSTALL_DIR) $(1)/usr/sbin

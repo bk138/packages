@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=django-statici18n
-PKG_VERSION:=1.3.0
+PKG_VERSION:=1.4.0
 PKG_RELEASE:=1
 PKG_LICENSE:=BSD-3-Clause
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://pypi.python.org/packages/86/6b/2c2e86a7e144ba7b064119eaafb2c8c67665c2a0e722f0819daa9657e551/
-PKG_MD5SUM:=61e22a6f2399f9f829308e4d91b36ee0
+PKG_SOURCE_URL:=https://pypi.python.org/packages/29/4d/fd9ba0e9b86c05714d9bc945d26376b331899d38c9b0666c7b38f3f26686/
+PKG_HASH:=3cb5334d42cfabda49c9c0efb1c24f5663e318ed34b3a34fada5195232f75f65
 PKG_BUILD_DEPENDS:=python python-setuptools
 
 include $(INCLUDE_DIR)/package.mk

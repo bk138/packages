@@ -9,12 +9,12 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/uclibc++.mk
 
 PKG_NAME:=smartmontools
-PKG_VERSION:=6.5
+PKG_VERSION:=6.6
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@SF/smartmontools
-PKG_MD5SUM:=093aeec3f8f39fa9a37593c4012d3156
+PKG_HASH:=51f43d0fb064fccaf823bbe68cf0d317d0895ff895aa353b3339a3b316a53054
 PKG_MAINTAINER:=Maxim Storchak <m.storchak@gmail.com>
 PKG_LICENSE:=GPL-2.0+
 PKG_LICENSE_FILES:=COPYING

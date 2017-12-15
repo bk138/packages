@@ -8,14 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libxslt
-PKG_VERSION:=1.1.28
-PKG_RELEASE:=2
+PKG_VERSION:=1.1.31
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:= \
 	http://xmlsoft.org/sources/ \
 	ftp://fr.rpmfind.net/pub/libxml/
-PKG_MD5SUM:=9667bf6f9310b957254fdcf6596600b7
+PKG_HASH:=db25e96b6b801144277e67c05b10560ac09dfff82ccd53a154ce86e43622f3ab
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=COPYING

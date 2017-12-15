@@ -1,6 +1,4 @@
 #
-# Copyright (C) 2006-2015 OpenWrt.org
-#
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
@@ -10,14 +8,16 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=mjpg-streamer
 PKG_REV:=182
 PKG_VERSION:=r$(PKG_REV)
-PKG_RELEASE:=8
-PKG_MAINTAINER:=Roger D <rogerdammit@gmail.com>
+PKG_RELEASE:=10
+PKG_MAINTAINER:=Roger D <rogerdammit@gmail.com>, \
+		Ted Hess <thess@kitschensync.net>
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).1.tar.bz2
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).1.tar.xz
 PKG_SOURCE_URL:=https://svn.code.sf.net/p/mjpg-streamer/code/mjpg-streamer-experimental
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_VERSION:=$(PKG_REV)
 PKG_SOURCE_PROTO:=svn
+PKG_MIRROR_HASH:=ccff417d0a34f7cee12c7984f77788267b1da0f2a7d849bc1b2e3614e670078b
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=LICENSE
@@ -69,6 +69,10 @@ define Build/Prepare
 	$(TAR) -xvf $(DL_DIR)/$(CAMBOZOLA) --strip=2 --wildcards \
 		-C $(PKG_BUILD_DIR)/www */dist/cambozola.jar
     endif
+endef
+
+define Build/Configure
+    $(RM) $(PKG_BUILD_DIR)/plugins/input_uvc/uvcvideo.h
 endef
 
 ifeq ($(CONFIG_MJPG_STREAMER_V4L2),y)
